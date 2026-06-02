@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-tech Elite - E-Commerce Mayorista 2026</title>
+    <style>
+        :root {
+            --bg-dark: #090a0f;
+            --card-bg: #141622;
+            --accent-blue: #007bff;
+            --accent-green: #2ecc71;
+            --text-main: #ffffff;
+            --text-muted: #8a8f98;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: rgba(20, 22, 34, 0.85);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 5%;
+            border-bottom: 1px solid #222538;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .cart-btn {
+            background: var(--card-bg);
+            border: 1px solid #222538;
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .cart-btn:hover { border-color: var(--accent-blue); }
+
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            background: #11131f;
+            border-bottom: 1px solid #222538;
+            padding: 10px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover { color: var(--accent-blue); }
+        .tab-btn.active { color: var(--accent-blue); border-bottom: 3px solid var(--accent-blue); }
+
+        .main-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            gap: 25px;
+        }
+
+        .catalog-container { flex: 1; }
+
+        .catalog-section {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .catalog-section.active { display: grid; }
+
+        /* Ajuste especial para cuando la sección de accesorios está vacía */
+        .catalog-section.coming-soon-mode {
+            display: none;
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding: 40px 0;
+        }
+        .catalog-section.coming-soon-mode.active { display: block; }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #1f2235;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+        }
+
+        .badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-alta { background: #ffeaa7; color: #d63031; }
+        .badge-media { background: #dff9fb; color: #0984e3; }
+        .badge-acc { background: #a29bfe; color: #6c5ce7; }
+
+        .product-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            margin-top: 15px;
+            filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.5));
+        }
+
+        .product-card h3 {
+            font-size: 1.1rem;
+            margin: 15px 0 5px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-card .brand {
+            color: var(--accent-blue);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .product-card .price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin: 12px 0;
+        }
+
+        .btn-add {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover { background: #0056b3; }
+
+        .cart-sidebar {
+            width: 380px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #1f2235;
+            height: fit-content;
+            position: sticky;
+            top: 110px;
+        }
+
+        .cart-sidebar h2 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #1f2235;
+            padding-bottom: 10px;
+        }
+
+        .cart-items {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #1f2235;
+            font-size: 0.85rem;
+        }
+
+        .cart-item button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cart-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-top: 1px solid #1f2235;
+            padding-top: 15px;
+        }
+
+        .payment-form { display: flex; flex-direction: column; gap: 10px; }
+        .payment-form input {
+            background: #090a0f;
+            border: 1px solid #1f2235;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .btn-pay {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        .btn-pay:hover { background: #219150; }
+
+        footer {
+            background-color: #0b0c12;
+            border-top: 1px solid #1f2235;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+
+        .footer-section { flex: 1; min-width: 250px; }
+        .footer-section h4 { color: var(--text-main); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; letter-spacing: 1px; }
+        .footer-section p { line-height: 1.6; margin: 8px 0; }
+        .footer-bottom { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1f2235; font-size: 0.8rem; }
+        
+        .placeholder-text {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="WhatsApp Image 2026-06-01 at 21.47.08.jpeg" alt="M-Tech Elite Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/150x60?text=M-Tech+Elite'">
+        </div>
+        <button class="cart-btn">🛒 Bolsa de Compra (<span id="global-count">0</span>)</button>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('gama-alta')">Gama Alta ✨</button>
+        <button class="tab-btn" onclick="switchTab('gama-media')">Gama Media 📱</button>
+        <button class="tab-btn" onclick="switchTab('accesorios')">Accesorios 🎧</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="catalog-container">
+            
+            <div id="gama-alta" class="catalog-section active">
+                <div class="product-card">
+                    <span class="badge badge-alta">Premium</span><span class="brand">Apple</span>
+                    <img src="https://tse1.mm.bing.net/th/id/OIP.TCdwWPVIHbuoNidTsimPGQHaHa?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3" alt="iPhone 17 Pro Max" onerror="this.src='https://via.placeholder.com/240x160?text=iPhone+17+Pro+Max'">
+                    <h3>iPhone 17 Pro Max</h3><div class="price">$1,299.00</div>
+                    <button class="btn-add" onclick="addItem('iPhone 17 Pro Max', 1299)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Premium</span><span class="brand">Samsung</span>
+                    <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400" alt="Galaxy S26 Ultra" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+S26+Ultra'">
+                    <h3>Galaxy S26 Ultra</h3><div class="price">$1,350.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy S26 Ultra', 1350)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Tablet</span><span class="brand">Apple</span>
+                    <img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400" alt="iPad Pro M4" onerror="this.src='https://via.placeholder.com/240x160?text=iPad+Pro+M4'">
+                    <h3>iPad Pro M4 13"</h3><div class="price">$1,199.00</div>
+                    <button class="btn-add" onclick="addItem('iPad Pro M4 13&quot;', 1199)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Tablet</span><span class="brand">Samsung</span>
+                    <img src="https://tse4.mm.bing.net/th/id/OIP.S9b0wsilJZIDS2OgJtjSzQHaHa?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Galaxy Tab S10 Ultra" onerror="this.src='https://via.placeholder.com/240x160?text=Tab+S10+Ultra'">
+                    <h3>Galaxy Tab S10 Ultra</h3><div class="price">$1,099.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy Tab S10 Ultra', 1099)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Premium</span><span class="brand">Apple</span>
+                    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400" alt="iPhone 17 Pro" onerror="this.src='https://via.placeholder.com/240x160?text=iPhone+17+Pro'">
+                    <h3>iPhone 17 Pro</h3><div class="price">$1,099.00</div>
+                    <button class="btn-add" onclick="addItem('iPhone 17 Pro', 1099)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Premium</span><span class="brand">Samsung</span>
+                    <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400" alt="Galaxy S26 Plus" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+S26+Plus'">
+                    <h3>Galaxy S26 Plus</h3><div class="price">$1,049.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy S26 Plus', 1049)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Foldable</span><span class="brand">Samsung</span>
+                    <img src="https://tse2.mm.bing.net/th/id/OIP.-A-BlbQpIW9ydw_0jvNOngHaEK?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Galaxy Z Fold 8" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+Z+Fold+8'">
+                    <h3>Galaxy Z Fold 8</h3><div class="price">$1,799.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy Z Fold 8', 1799)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-alta">Foldable</span><span class="brand">Samsung</span>
+                    <img src="https://www.geeky-gadgets.com/wp-content/uploads/2026/01/galaxy-z-flip-8-battery-life-upgrade.webp" alt="Galaxy Z Flip 8" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+Z+Flip+8'">
+                    <h3>Galaxy Z Flip 8</h3><div class="price">$1,050.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy Z Flip 8', 1050)">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <div id="gama-media" class="catalog-section">
+                <div class="product-card">
+                    <span class="badge badge-media">Balanceado</span><span class="brand">Samsung</span>
+                    <img src="https://tse4.mm.bing.net/th/id/OIP.BQATs7pyyjE1EGqxFDoJIwHaEK?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Galaxy A57 5G" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+A57+5G'">
+                    <h3>Galaxy A57 5G</h3><div class="price">$425.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy A57 5G', 425)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-media">iOS Entrada</span><span class="brand">Apple</span>
+                    <img src="https://tse1.mm.bing.net/th/id/OIP.Fexib3wG7EQ75KVjfEFGhwHaHa?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3" alt="iPhone SE 4" onerror="this.src='https://via.placeholder.com/240x160?text=iPhone+SE+4'">
+                    <h3>iPhone SE 4</h3><div class="price">$499.00</div>
+                    <button class="btn-add" onclick="addItem('iPhone SE 4', 499)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-media">Tablet</span><span class="brand">Apple</span>
+                    <img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400" alt="iPad Air M2" onerror="this.src='https://via.placeholder.com/240x160?text=iPad+Air+M2'">
+                    <h3>iPad Air M2</h3><div class="price">$599.00</div>
+                    <button class="btn-add" onclick="addItem('iPad Air M2', 599)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-media">Tablet</span><span class="brand">Samsung</span>
+                    <img src="https://media.ldlc.com/r1600/ld/products/00/06/22/95/LD0006229568.jpg" alt="Galaxy Tab S10 FE" onerror="this.src='https://via.placeholder.com/240x160?text=Tab+S10+FE'">
+                    <h3>Galaxy Tab S10 FE</h3><div class="price">$449.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy Tab S10 FE', 449)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-media">Premium Base</span><span class="brand">Apple</span>
+                    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400" alt="iPhone 17 Base" onerror="this.src='https://via.placeholder.com/240x160?text=iPhone+17+Base'">
+                    <h3>iPhone 17 Base</h3><div class="price">$799.00</div>
+                    <button class="btn-add" onclick="addItem('iPhone 17 Base', 799)">Añadir al Carrito</button>
+                </div>
+                <div class="product-card">
+                    <span class="badge badge-media">Premium Base</span><span class="brand">Samsung</span>
+                    <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400" alt="Galaxy S26 Base" onerror="this.src='https://via.placeholder.com/240x160?text=Galaxy+S26+Base'">
+                    <h3>Galaxy S26 Base</h3><div class="price">$799.00</div>
+                    <button class="btn-add" onclick="addItem('Galaxy S26 Base', 799)">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <div id="accesorios" class="catalog-section coming-soon-mode">
+                <div class="placeholder-text">Próximamente</div>
+            </div>
+
+        </div>
+
+        <div class="cart-sidebar">
+            <h2>Resumen de Orden</h2>
+            <div class="cart-items" id="cart-list">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 20px;">El carrito está vacío</p>
+            </div>
+            
+            <div class="cart-total">
+                <span>Total:</span>
+                <span style="color: var(--accent-green);">$<span id="total-price">0.00</span></span>
+            </div>
+
+            <div class="payment-form">
+                <h3 style="margin: 0 0 10px 0; font-size: 1rem;">Detalles de Facturación</h3>
+                <input type="text" id="pay-name" placeholder="Nombre en la tarjeta" required>
+                <input type="text" id="pay-card" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" placeholder="MM/AA" style="width: 50%;" required>
+                    <input type="password" placeholder="CVV" style="width: 50%;" required>
+                </div>
+                <button class="btn-pay" onclick="procesarPago()">Confirmar y Pagar Orden</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>M-TECH ELITE</h4>
+                <p>Distribuidor Autorizado de ecosistemas Apple y Samsung Premium para el mercado mayorista e institucional.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Sede Central</h4>
+                <p>📍 Alameda Roosevelt, Edificio M-Tech Elite, Planta Baja, San Salvador, El Salvador.</p>
+                <p>⏱️ Horario de Atención: Lunes a Viernes de 8:00 AM a 5:30 PM / Sábados de 8:00 AM a 12:00 PM.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto Institucional</h4>
+                <p>📞 Teléfono Principal: +503 2200-4500</p>
+                <p>📱 Soporte WhatsApp Corporativo: +503 7000-1122</p>
+                <p>✉️ Correo Institucional: <a href="mailto:contacto@mtechelite.com" style="color: var(--accent-blue); text-decoration: none;">contacto@mtechelite.com</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 M-Tech Elite. Proyecto Académico de Simulación Comercial - Todos los derechos reservados.
+        </div>
+    </footer>
+
+    <script>
+        let cart = [];
+
+        function addItem(name, price) {
+            cart.push({ name, price });
+            updateCartUI();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartList = document.getElementById('cart-list');
+            const totalPriceEl = document.getElementById('total-price');
+            const globalCountEl = document.getElementById('global-count');
+            
+            if (cart.length === 0) {
+                cartList.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 20px;">El carrito está vacío</p>';
+                totalPriceEl.textContent = '0.00';
+                globalCountEl.textContent = '0';
+                return;
+            }
+
+            cartList.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                const itemEl = document.createElement('div');
+                itemEl.className = 'cart-item';
+                itemEl.innerHTML = `
+                    <span>${item.name} - <strong>$${item.price.toFixed(2)}</strong></span>
+                    <button onclick="removeItem(${index})">❌</button>
+                `;
+                cartList.appendChild(itemEl);
+            });
+
+            totalPriceEl.textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            globalCountEl.textContent = cart.length;
+        }
+
+        function switchTab(tabId) {
+            const sections = document.querySelectorAll('.catalog-section');
+            const buttons = document.querySelectorAll('.tab-btn');
+
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function procesarPago() {
+            const name = document.getElementById('pay-name').value.trim();
+            const card = document.getElementById('pay-card').value.trim();
+
+            if (cart.length === 0) {
+                alert('La bolsa de compras está vacía. Añade algo antes de intentar pagar.');
+                return;
+            }
+
+            if (!name || !card) {
+                alert('Por favor, completa los campos de facturación obligatorios.');
+                return;
+            }
+
+            alert(`¡Simulación de pago exitosa!\nGracias por su compra institucional en M-Tech Elite.\nTotal procesado: $${document.getElementById('total-price').textContent}`);
+            cart = [];
+            updateCartUI();
+            document.getElementById('pay-name').value = '';
+            document.getElementById('pay-card').value = '';
+        }
+    </script>
+</body>
+</html>
